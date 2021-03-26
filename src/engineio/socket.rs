@@ -5,6 +5,7 @@ use super::packet::{Packet, PacketId};
 use crate::engineio::transport::TransportClient;
 use crate::error::{Error, Result};
 use bytes::Bytes;
+use log::error;
 use std::sync::{
     atomic::{AtomicBool, Ordering},
     Arc, RwLock,
@@ -42,7 +43,11 @@ impl EngineSocket {
             loop {
                 match s.poll_cycle() {
                     Ok(_) => break,
-                    e @ Err(Error::HttpError(_)) | e @ Err(Error::ReqwestError(_)) => panic!(e),
+                    e @ Err(Error::HttpError(_)) | e @ Err(Error::ReqwestError(_)) => {
+                        error!("socket.io connection errored out.");
+                        std::process::exit(-1);
+                        panic!(e)
+                    },
                     _ => (),
                 }
             }
